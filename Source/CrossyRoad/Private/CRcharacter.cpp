@@ -1,31 +1,88 @@
 #include "CRcharacter.h"
 
-// Sets default values
 ACRcharacter::ACRcharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
+	bCanLaunch = true;
 }
 
-// Called when the game starts or when spawned
 void ACRcharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-// Called every frame
 void ACRcharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-// Called to bind functionality to input
 void ACRcharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAction("MoveForward", IE_Pressed, this, &ACRcharacter::LaunchForward);
+	PlayerInputComponent->BindAction("MoveBackward", IE_Pressed, this, &ACRcharacter::LaunchBackward);
+	PlayerInputComponent->BindAction("MoveRight", IE_Pressed, this, &ACRcharacter::LaunchRight);
+	PlayerInputComponent->BindAction("MoveLeft", IE_Pressed, this, &ACRcharacter::LaunchLeft);
 }
 
+void ACRcharacter::LaunchForward()
+{
+	PerformLaunch(FVector(LaunchForce, 0.0f, LaunchUpwardForce));
+}
+
+void ACRcharacter::LaunchBackward()
+{
+	PerformLaunch(FVector(-LaunchForce, 0.0f, LaunchUpwardForce));
+}
+
+void ACRcharacter::LaunchRight()
+{
+	PerformLaunch(FVector(0.0f, LaunchForce, LaunchUpwardForce));
+}
+
+void ACRcharacter::LaunchLeft()
+{
+	PerformLaunch(FVector(0.0f, -LaunchForce, LaunchUpwardForce));
+}
+
+void ACRcharacter::ResetLaunch()
+{
+	bCanLaunch = true;
+}
+
+void ACRcharacter::PerformLaunch(const FVector& LaunchDirection)
+{
+	if (bCanLaunch)
+	{
+		LaunchCharacter(LaunchDirection, true, true);
+
+		FVector HorizontalDirection = LaunchDirection;
+		HorizontalDirection.Z = 0.0f;
+
+		if (!HorizontalDirection.IsNearlyZero())
+		{
+			FRotator NewRotation = FRotationMatrix::MakeFromX(HorizontalDirection).Rotator();
+			
+			NewRotation.Yaw -= 90.0f;
+
+			RotateSkeletalMesh(NewRotation);
+		}
+
+		bCanLaunch = false;
+		
+		GetWorld()->GetTimerManager().SetTimer(LaunchCooldownTimerHandle, this, &ACRcharacter::ResetLaunch, LaunchCooldown, false);
+	}
+}
+
+void ACRcharacter::RotateSkeletalMesh(const FRotator& TargetRotation)
+{
+	USkeletalMeshComponent* SkeletalMesh = FindComponentByClass<USkeletalMeshComponent>();
+	if (SkeletalMesh)
+	{
+		SkeletalMesh->SetWorldRotation(TargetRotation);
+	}
+}
