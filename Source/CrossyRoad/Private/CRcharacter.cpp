@@ -5,6 +5,11 @@ ACRcharacter::ACRcharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 	bCanLaunch = true;
+
+	LaunchForce = 250.0f;
+	LaunchUpwardForce = 250.0f;
+	LaunchCooldown = 0.5f;
+	RotationInterpSpeed = 5.0f;
 }
 
 void ACRcharacter::BeginPlay()

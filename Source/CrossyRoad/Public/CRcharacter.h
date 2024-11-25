@@ -38,18 +38,18 @@ private:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float LaunchForce = 250.0f;
+	float LaunchForce;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float LaunchUpwardForce = 250.0f;
+	float LaunchUpwardForce;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cooldown")
-	float LaunchCooldown = 0.5f;
+	float LaunchCooldown;
 
 private:
 	bool bCanLaunch;
 
 	FTimerHandle LaunchCooldownTimerHandle;
 
-	float RotationInterpSpeed = 5.0f;
+	float RotationInterpSpeed;
 };
